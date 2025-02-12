@@ -4,6 +4,7 @@ JSON-LD extractor
 """
 
 import json
+import json5
 import re
 
 import jstyleson
@@ -15,9 +16,7 @@ HTML_OR_JS_COMMENTLINE = re.compile(r"^\s*(//.*|<!--.*-->)")
 
 
 class JsonLdExtractor:
-    _xp_jsonld = lxml.etree.XPath(
-        'descendant-or-self::script[@type="application/ld+json"]'
-    )
+    _xp_jsonld = lxml.etree.XPath('descendant-or-self::script[@type="application/ld+json"]')
 
     def extract(self, htmlstring, base_url=None, encoding="UTF-8"):
         tree = parse_html(htmlstring, encoding=encoding)
@@ -39,7 +38,14 @@ class JsonLdExtractor:
             data = json.loads(script, strict=False)
         except ValueError:
             # sometimes JSON-decoding errors are due to leading HTML or JavaScript comments
-            data = jstyleson.loads(HTML_OR_JS_COMMENTLINE.sub("", script), strict=False)
+            try:
+                data = jstyleson.loads(HTML_OR_JS_COMMENTLINE.sub("", script), strict=False)
+            except ValueError:
+                try:
+                    data = json5.loads(script)
+                except ValueError:
+                    data = {}
+
         if isinstance(data, list):
             yield from data
         elif isinstance(data, dict):
