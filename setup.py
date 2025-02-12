@@ -48,6 +48,7 @@ setup(
         "w3lib",
         "html-text>=0.5.1",
         "jstyleson",
+        "json5",
     ],
     extras_require={
         "cli": [

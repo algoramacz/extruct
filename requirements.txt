@@ -9,3 +9,4 @@ mf2py>=1.1.0
 w3lib
 html-text
 jstyleson
+json5
